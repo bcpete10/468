@@ -1,0 +1,36 @@
+# $Id: local.rules,v 1.11 2004/07/23 20:15:44 bmc Exp $
+# ----------------
+# LOCAL RULES
+# ----------------
+# This file intentionally does not come with signatures.  Put your local
+# additions here.
+
+#Bryan Peterson Project 3 rules
+
+#Task 4.1, Land Attack
+alert tcp $EXTERNAL_NET any -> 10.0.0.10 80 (msg: "Possible LAND attack detected"; sameip; classtype:attempted-dos; sid:100001; priority:1;)
+
+#Task 4.2, Flooding Attack
+alert tcp $HOME_NET any -> 10.0.0.10 any (flags:S;  msg: "Possible SYN flood attack attack detected"; detection_filter: track by_dst, count 20, seconds 60; classtype:attempted-dos; sid:1000002; priority:1;)
+
+#Task 4.3, Smurf Attack 
+alert icmp any any -> 10.255.255.255 any (itype 8; icode 0; msg: "Possible Smurf attack detected"; sid:1000003; priority:3;)
+
+#Task 4.4, UDP Flood attack
+alert udp any any -> $HOME_NET any (msg:"Possible UDP flood attack detected"; threshold: type both, track by_dst, count 10, seconds 60; classtype:attempted-dos; sid:1000004; priority:4;)
+
+#Task 4.5 Detect ACK  Port Scan
+alert tcp any any -> $HOME_NET any (flags:A; msg:"TCP ACK Scan detected"; detection_filter:track by_dst, count 20, seconds 60; sid: 1000005;)
+
+#Task 4.5 Detect FIN Port Scan
+alert tcp any any -> $HOME_NET any (flags:F; msg:"TCP FIN Scan Detected"; detection_filter:track by_dst, count 20, seconds 60; sid:1000006;)
+
+#Task 4.5 Detect XMAS Port Scan
+alert tcp any any -> $HOME_NET any (flags:FPU; msg:"TCP XMAS Scan Detected"; detection_filter:track by_dst, count 20, seconds 60; sid:1000007;)
+
+#Task 4.5 UDP Port Scan
+alert udp any any -> $HOME_NET any (flags:UDP; msg:"TCP UDP Scan Detected"; detection_filter:track by_dst, count 20, seconds 60; sid:1000008;)
+
+#Task 4.5 Null Port Scan   Not too sure if this is correct
+
+alert tcp any any -> $HOME_NET any (flags:0; msg:"TCP Null Scan Detected"; detection_filter:track by_dst, count 20, seconds 60; sid:1000009;)
