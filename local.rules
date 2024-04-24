@@ -1,36 +1,76 @@
 # $Id: local.rules,v 1.11 2004/07/23 20:15:44 bmc Exp $
+
 # ----------------
+
 # LOCAL RULES
+
 # ----------------
+
 # This file intentionally does not come with signatures.  Put your local
+
 # additions here.
 
-#Bryan Peterson Project 3 rules
 
-#Task 4.1, Land Attack
-alert tcp $EXTERNAL_NET any -> 10.0.0.10 80 (msg: "Possible LAND attack detected"; sameip; classtype:attempted-dos; sid:100001; priority:1;)
 
-#Task 4.2, Flooding Attack
-alert tcp $HOME_NET any -> 10.0.0.10 any (flags:S;  msg: "Possible SYN flood attack attack detected"; detection_filter: track by_dst, count 20, seconds 60; classtype:attempted-dos; sid:1000002; priority:1;)
+#Bryan Peterson Project 4 rules
 
-#Task 4.3, Smurf Attack 
-alert icmp any any -> 10.255.255.255 any (itype 8; icode 0; msg: "Possible Smurf attack detected"; sid:1000003; priority:3;)
 
-#Task 4.4, UDP Flood attack
-alert udp any any -> $HOME_NET any (msg:"Possible UDP flood attack detected"; threshold: type both, track by_dst, count 10, seconds 60; classtype:attempted-dos; sid:1000004; priority:4;)
 
-#Task 4.5 Detect ACK  Port Scan
-alert tcp any any -> $HOME_NET any (flags:A; msg:"TCP ACK Scan detected"; detection_filter:track by_dst, count 20, seconds 60; sid: 1000005;)
+#Log SYN Scans
 
-#Task 4.5 Detect FIN Port Scan
-alert tcp any any -> $HOME_NET any (flags:F; msg:"TCP FIN Scan Detected"; detection_filter:track by_dst, count 20, seconds 60; sid:1000006;)
+alert tcp any any -> $HOME_NET any (flags: S; msg:"SYN scan detected, check firewall response";sid:2000001; rev:1;)
 
-#Task 4.5 Detect XMAS Port Scan
-alert tcp any any -> $HOME_NET any (flags:FPU; msg:"TCP XMAS Scan Detected"; detection_filter:track by_dst, count 20, seconds 60; sid:1000007;)
 
-#Task 4.5 UDP Port Scan
-alert udp any any -> $HOME_NET any (flags:UDP; msg:"TCP UDP Scan Detected"; detection_filter:track by_dst, count 20, seconds 60; sid:1000008;)
 
-#Task 4.5 Null Port Scan   Not too sure if this is correct
+#Log ACK Scans
 
-alert tcp any any -> $HOME_NET any (flags:0; msg:"TCP Null Scan Detected"; detection_filter:track by_dst, count 20, seconds 60; sid:1000009;)
+alert tcp any any -> $HOME_NET any (flags: A; msg:"ACK scan detected, check firewall response"; sid:2000002; rev:1;)
+
+
+
+
+
+#Detect potential firewawll bypasses here
+
+#FIN Scans
+
+alert tcp any any -> $HOME_NET any (flags: F; msg:"FIN scan detected"; sid:2000003; rev:1;)
+
+
+
+#XMAS Scans
+
+alert tcp any any -> $HOME_NET any (flags: FPU; msg:"XMAS scan detected"; sid:2000004; rev:1;)
+
+
+
+#NUll Scans
+
+alert tcp any any -> $HOME_NET any (flags: 0; msg:"Null scan detected"; sid:2000005;rev:1;)
+
+
+
+#Check fragmented packets
+
+alert ip any any -> $HOME_NET any (fragbits: M; msg"Fragmented packet detected, possible evasion attempt"; sid:2000006;rev:1;)
+
+
+
+#Detect slow comp. Scans
+
+alert tcp any any -> $HOME_NET any (flags: S; detection_filter:track by_dst, count 1, seconds 60; msg:"Slow scan potentially deetected"; sid:2000007; rev:1;)
+
+
+
+#Detect DNS query flood
+
+alert udp any any -> $HOME_NET 53 (msg:"High volume of DNS requests detected"; sid:2000008; rev:1;)
+
+
+
+#Detect packet forgery
+
+alert ip any any -> $HOME_NET any (ttl: <32; msg:"Low TTL, possible packet forgery in progress"; sid:2000009; rev:1;)
+
+alert ip any any -> $HOME_NET any (ttl: >128; msg:"High TTL, possible packet forgery"; sid:2000010;rev:1;)
+
